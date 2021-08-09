@@ -5,7 +5,9 @@ Running: <input type="checkbox" id="numberRunning" checked></input>
 <button onclick="func1()">Reset to 0</button>
 <button onclick="func2()">x2 Speed</button>
 <button onclick="func3()">/2 Speed</button>
-<button onclick="func4()">Reverse</button>
+<button onclick="func4()">Increase precision</button>
+<button onclick="func5()">Decrease precision</button>
+<button onclick="func6()">Reverse</button>
 <p>NUMBER:<br><font size="5" id="number"></font></p>
 <script>
 var t=0;
@@ -213,7 +215,9 @@ setInterval(save, 100);
 function func1() {t=0}
 function func2() {tStep*=2}
 function func3() {tStep/=2}
-function func4() {tStep*=-1}
+function func4() {maxPrecisionDigits+=1}
+function func5() {maxPrecisionDigits-=1}
+function func6() {tStep*=-1}
 
 </script>
 </body>
