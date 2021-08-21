@@ -11,9 +11,7 @@ Running: <input type="checkbox" id="numberRunning" checked></input>
 <button onclick="func7()">Rewind 1 hour</button>
 <button onclick="func8()">x2 Speed</button>
 <button onclick="func9()">/2 Speed</button>
-<button onclick="func10()">Increase precision</button>
-<button onclick="func11()">Decrease precision</button>
-<button onclick="func12()">Reverse</button>
+<button onclick="func10()">Reverse</button>
 <p>NUMBER:<br><font size="5" id="number"></font></p>
 <script>
 var t=0;
@@ -227,9 +225,7 @@ function func6() {t+=360000*speedMultiplier}
 function func7() {t-=360000*speedMultiplier}
 function func8() {tStep*=2}
 function func9() {tStep/=2}
-function func10() {maxPrecisionDigits+=1}
-function func11() {maxPrecisionDigits-=1}
-function func12() {tStep*=-1}
+function func10() {tStep*=-1}
 
 </script>
 </body>
