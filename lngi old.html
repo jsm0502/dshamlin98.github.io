@@ -163,7 +163,7 @@ function valueNumber(t) {
 
 function displayOutput() {
 	document.getElementById("number").innerHTML = "<sup>".repeat(8) + " " + "</sup>".repeat(8) + valueNumber(t);
-	t++;
+	t += 100;
 	}
 setInterval(displayOutput,10);
 
