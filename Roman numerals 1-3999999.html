@@ -30,7 +30,7 @@ function outputNumber() {
 	currentNumber = Math.min(1 + t/20 + t**3/1000000000, 3999999)
 	document.getElementById("number1").innerHTML = Math.floor(currentNumber);
 	document.getElementById("number2").innerHTML = romanNumber(currentNumber);
-	t++;
+	t+=100;
 }
 setInterval(outputNumber, 50);
 </script>
