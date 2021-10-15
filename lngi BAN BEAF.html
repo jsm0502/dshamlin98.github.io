@@ -3,6 +3,7 @@
 <body>
 Running: <input type="checkbox" id="numberRunning" checked></input>
 <p><font size="5" id="number"></font></p>
+<button onclick="func1()">Reset to 0</button>
 <script>
 var t=0;
 var tReduce=0;
@@ -221,6 +222,7 @@ function displayNumber() {
 setInterval(displayNumber, 16);
 setInterval(save, 100);
 
+function func1() {t=0}
 
 /*
 [1](n) = {10, n}
