@@ -1,10 +1,12 @@
+
 <!DOCTYPE html>
 <html>
 <body>
 <button onclick="startstop()">Pause/Resume</button>
 <button onclick="resetTo0()">Reset to 0</button>
+<button onclick="goToMaxValue()">Go to maximum value</button>
 <button onclick="showNumber()">Show number</button>
-Max number of digits before switching to scientific (min: 10, max: 308): <input type="text" value="21" id="maxDigits"></input> Use 60fps:<input type="checkbox" id="fps60"></input>
+Max number of digits before switching to scientific (min: 10, max: 308): <input type="text" value="21" id="maxDigits"></input> Reduce fps:<input type="checkbox" id="fps20"></input>
 <br>
 <button onclick="plus1s()">Fast forward 1 second</button>
 <button onclick="minus1s()">Rewind 1 second</button>
@@ -14,23 +16,24 @@ Max number of digits before switching to scientific (min: 10, max: 308): <input 
 <button onclick="minus1h()">Rewind 1 hour</button>
 <button onclick="speedDouble()">Speed x2</button>
 <button onclick="speedHalf()">Speed /2</button>
-
-<p><font face="human number" size="5" id="number2"></font>
-<font face="human number" size="7" id="number"></font></p>
+<button onclick="reverseSpeed()">Reverse</button>
+<br>
+Speed multiplier: <input type="text" value="1" id="speedMult"></input>
+<p> </p>
+<p><center><font face="comic neue" size="6" id="number2"></font></center></p>
+<p><font face="comic neue" size="6" id="number"></font></p>
 <script>
-//<button onclick="plus1h()">Fast forward 1 hour</button>
-//<button onclick="minus1h()">Rewind 1 hour</button>
 var t = 0;
 var speedMultiplier = 1;
 var numberDisplay = 0;
 
 function save() {
-	localStorage.setItem('numsv', JSON.stringify(t));
+	localStorage.setItem('numsv2', JSON.stringify(t));
 }
 
 function load() {
-	if (localStorage.getItem('numsv')) {
-		t = JSON.parse(localStorage.getItem('numsv'));
+	if (localStorage.getItem('numsv2')) {
+		t = JSON.parse(localStorage.getItem('numsv2'));
 	}
 }
 
@@ -127,9 +130,10 @@ function tier1number(logNum) {
 	if (logNum >= 3003) {
 		return "";
 	}
-	if (logNum < 12) {
+	if (logNum < 15) {
 		num = Math.floor(10**logNum);
-		numArray = [num%1000, Math.floor((num/1000)%1000), Math.floor((num/1e6)%1000), Math.floor((num/1e9)%1000)];
+		numArray = [num%1000, Math.floor((num/1000)%1000), Math.floor((num/1e6)%1000), Math.floor((num/1e9)%1000), Math.floor((num/1e12)%1000)];
+		if (numArray[4] > 0) {numberName += tier0number(numArray[4]) + " trillion<br>"}
 		if (numArray[3] > 0) {numberName += tier0number(numArray[3]) + " billion<br>"}
 		if (numArray[2] > 0) {numberName += tier0number(numArray[2]) + " million<br>"}
 		if (numArray[1] > 0) {numberName += tier0number(numArray[1]) + " thousand<br>"}
@@ -203,14 +207,21 @@ function tier2number(loglogNum) {
 	if (logIllionNumber >= 3000) {
 		return "";
 	}
-	if (logIllionNumber < 9) {
+	if (logIllionNumber < 12) {
 		var illionNumber = Math.floor(10**logIllionNumber);
 		logNum = 3*10**logIllionNumber+3;
 		numArray = [Math.floor((10**(logNum%3)*1000)%1000), Math.floor(10**(logNum%3))];
 		if (illionNumber >= 1e4) {k=0} else {k=1};
 		for (i=0; i<=k; i++) {
-		illionArray = [illionNumber%1000, Math.floor((illionNumber/1000)%1000), Math.floor((illionNumber/1e6)%1000)];
-		if (illionNumber < 1e6) {numberName += tier0number(numArray[1-i]) + "<br>"} else {numberName += "one "};
+		illionArray = [illionNumber%1000, Math.floor((illionNumber/1000)%1000), Math.floor((illionNumber/1e6)%1000), Math.floor((illionNumber/1e9)%1000)];
+		numberName += tier0number(numArray[1-i]) + "<br>";
+		if (illionArray[3] > 0) {
+			if (illionNumber%1e9 == 0) {
+				numberName += tier1illionPrefix(illionArray[3], 2) + "nan".fontcolor("blue");
+			} else {
+				numberName += tier1illionPrefix(illionArray[3], 2) + "nano".fontcolor("blue") + "-";
+			}
+		}
 		if (illionArray[2] > 0) {
 			if (illionNumber%1e6 == 0) {
 				numberName += tier1illionPrefix(illionArray[2], 2) + "micr".fontcolor("blue");
@@ -298,7 +309,7 @@ function tier3illionPrefix(num, vers) {
 function tier3number(logloglogNum) {
 // 1e(3e3000) -> log(3000.4771212547197)
 // killillion -> 3.477190319603795
-	var numberName = "one ";
+	var numberName = "one\u00A0";
 	var num = 0;
 	var illionNumber = 0;
 	var logNum = 0;
@@ -310,11 +321,11 @@ function tier3number(logloglogNum) {
 		numArray = [Math.floor((10**(10**logloglogNum%3)*1000)%1000), Math.floor(10**(10**logloglogNum%3))];
 		if (tier2illion < 1e4 && numArray[0] != 0) {k=1} else {k=0};
 		for (i=0; i<=k; i++) {
-			illionArray = [Math.floor(tier2illion%1000), Math.floor((tier2illion/1000)%1000), Math.floor(tier2illion/1e6)]; // ones, thousands, millions
-			if (tier2illion < 1e6) {
+			illionArray = [Math.floor(tier2illion%1000), Math.floor((tier2illion/1000)%1000), Math.floor((tier2illion/1e6)%1000)]; // ones, thousands, millions
+			if (tier2illion < 1e9) {
 				numberName += tier1illionPrefix(Math.floor(numArray[1-i]), 2); // T1 prefix
 				if (tier2illion >= 1e3) {
-					if (Math.floor(numArray[1]) > 1) {numberName += "-"};
+					if (Math.floor(numArray[1-i]) > 1) {numberName += "-"};
 					numberName += "<br>"
 				}
 			}
@@ -377,7 +388,7 @@ function tier3number(logloglogNum) {
 function tier4illionPrefix(num, vers) {
 // vers = 0: right before illion, 1: tier-2 separator, 2: tier-3 separator
 	var nums = ["","kal","mej","gij","ast","lun","ferm","jov","sol","bet","gloc","gax","sup","vers","mult","pyr"];
-	var nums2 = ["","al","ej","ij","ast","un","erm","ov","ol","eet","oc","ax","up","ers","ult"]; // using eat instead of at because of the sequence bet,det,tret,tet,pet can cause confusion with meg,gig,ter,pet with pet having two possible meanings.
+	var nums2 = ["","al","ej","ij","ast","un","erm","ov","ol","eet","oc","ax","up","ers","ult"]; // using eet instead of et because of the sequence bet,det,tret,tet,pet can cause confusion with meg,gig,ter,pet with pet having two possible meanings.
 	var numberName = "";
 	num = Math.floor(num);
 	if (num > 14 || num <= 0) {
@@ -398,16 +409,24 @@ function tier4number(loglogloglogNum) {
 		loglogloglogNum = Math.log10(10**(loglogloglogNum)-Math.log10(3));
 	}
 	var tier3illion = Math.floor(10**loglogloglogNum/3); // 1000 = kalillion, 1m = mej-
-	if (tier3illion < 1e9) {
+	if (tier3illion < 1e12) {
 		numArray = [Math.floor((10**(10**loglogloglogNum%3)*1000)%1000), Math.floor(10**(10**loglogloglogNum%3))];
-		if (tier3illion < 1e4 && numArray[0] != 0) {k=1} else {k=0};
+		if (tier3illion < 1e5 && numArray[0] != 0) {k=1} else {k=0};
 		for (i=0; i<=k; i++) {
-			illionArray = [Math.floor(tier3illion%1000), Math.floor((tier3illion/1000)%1000), Math.floor(tier3illion/1e6)]; // ones, thousands, millions
-			if (tier3illion < 1e6) {
-				numberName += tier2illionPrefix(Math.floor(numArray[1-i]), 2).fontcolor("blue"); // T2 prefix
-				if (tier3illion >= 1e4) {
-					if (numArray[1] > 1) {numberName += "-"};
-					numberName += "<br>";
+			illionArray = [Math.floor(tier3illion%1000), Math.floor((tier3illion/1000)%1000), Math.floor((tier3illion/1e6)%1000), Math.floor(tier3illion/1e9)]; // ones, thousands, millions
+			if (tier3illion < 1e12) {
+				numberName += tier2illionPrefix(numArray[1-i], 2).fontcolor("blue"); // T2 prefix
+				if (numArray[1-i] > 1) {numberName += "-"};
+				numberName += "<br>";
+			}
+			if (illionArray[3] > 0) {
+				if (illionArray[3] > 1) {
+					numberName += tier3illionPrefix(illionArray[3], 2).fontcolor("green") + "ij".fontcolor("red");
+				} else {
+					numberName += "gij".fontcolor("red");
+				}
+				if (illionArray[1] > 0 || illionArray[2] > 0) {
+					numberName += "i".fontcolor("red");
 				}
 			}
 			if (illionArray[2] > 0) {
@@ -469,9 +488,9 @@ function tier4number(loglogloglogNum) {
 	return (numberName+"illion").trim();
 }
 function valueNumber(t) {
-	var x = 10*(t+1e5)**0.8-1e5;
-	if (!(document.getElementById("fps60").checked)) {
-		x = 10*(Math.floor(t/5/speedMultiplier)*5*speedMultiplier+1e5)**0.8-1e5;
+	var x = 10*(t+1e4)**0.75-1e4+t**1.1/100;
+	if (document.getElementById("fps20").checked) {
+		x = 10*((t-t%(5*speedMultiplier))+1e4)**0.75-1e4+(t-t%(5*speedMultiplier))**1.1/100;
 	}
 	if (x < 30000) {
 		return tier0number((x/1000)**2 + x/300); // up to 10^3
@@ -479,28 +498,29 @@ function valueNumber(t) {
 		i = (x-30000)/270000
 		return tier1number(3 + 7*i); // up to 10^10
 	} else if (x < 2300000) {
+		//i = Math.min((x-300000)/2000000,Math.log10(Math.log10(12)))
 		i = (x-300000)/2000000
 		if (10**10**i < 3003) {
 			return tier1number(10**10**i);
 		} else {
 			return tier2number(10**i);
 		} // from 10^10 to 10^^3
-	} else if (x < 6800000) {
-		i = (x-2300000)/4500000
+	} else if (x < 5000000) {
+		i = (x-2300000)/2700000
 		if (10**10**i < 3000.47712125471966) {
 			return tier2number(10**10**i);
 		} else {
 			return tier3number(10**i);
 		} // from 10^^3 to 10^^4
-	} else if (x < 17000000) {
-		i = (x-6800000)/10200000
+	} else if (x < 10000000) {
+		i = (x-5000000)/5000000
 		if (10**10**i < 3000.47712125471966) {
 			return tier3number(10**10**i);
 		} else {
 			return tier4number(10**i);
 		} // from 10^^4 to 10^^5
 	} else {
-		i = (x-17000000)/23000000
+		i = (x-10000000)/7000000
 		if (10**10**i < 45.477121254719662) {
 			return tier4number(10**10**i);
 		}
@@ -511,9 +531,10 @@ function valueNumber2(t) {
 	var numDigits = document.getElementById("maxDigits").value;
 	if (isNaN(numDigits)) {numDigits = 10}
 	numDigits = Math.max(Math.min(Math.floor(numDigits),308),10);
-	var x = 10*(t+1e5)**0.8-1e5;
-	if (!(document.getElementById("fps60").checked)) {
-		x = 10*(Math.floor(t/5/speedMultiplier)*5*speedMultiplier+1e5)**0.8-1e5;
+	var x = 10*(t+1e4)**0.75-1e4+t**1.1/100;
+	var getFullNumber = "";
+	if (document.getElementById("fps20").checked) {
+		x = 10*((t-t%(5*speedMultiplier))+1e4)**0.75-1e4+(t-t%(5*speedMultiplier))**1.1/100;
 	}
 	if (x < 30000) {
 		return Math.floor((x/1000)**2 + x/300).toLocaleString(); // up to 10^3
@@ -521,28 +542,32 @@ function valueNumber2(t) {
 		i = (x-30000)/270000
 		return Math.floor(10**(3 + 7*i)).toLocaleString(); // up to 10^10
 	} else if (x < 2300000) {
+		//i = Math.min((x-300000)/2000000,Math.log10(Math.log10(12)))
 		i = (x-300000)/2000000
 		if (10**10**i < numDigits) {
 			return Math.floor(10**10**10**i).toLocaleString();
 		} else {
-			return (Math.floor(10**((10**10**i)%1)*1000000)/1000000).toFixed(6) + " × 10<sup>" + Math.floor(10**10**i).toLocaleString() + "</sup>";
+			if (10**10**i < 100) {
+				getFullNumber = "<br><font size=\"4\">" + Math.floor(10**10**10**i).toLocaleString() + "</font>";
+			}
+			return (Math.floor(10**((10**10**i)%1)*1000000)/1000000).toFixed(6) + " × 10<sup>" + Math.floor(10**10**i).toLocaleString() + "</sup>" + getFullNumber;
 		} // from 10^10 to 10^^3
-	} else if (x < 6800000) {
-		i = (x-2300000)/4500000
+	} else if (x < 5000000) {
+		i = (x-2300000)/2700000
 		if (10**10**i < numDigits) {
 			return "10<sup>" + Math.floor(10**10**10**i).toLocaleString() + "</sup>";
 		} else {
 			return "10<sup>" + (Math.floor(10**((10**10**i)%1)*1000000)/1000000).toFixed(6) + " × 10<sup>" + Math.floor(10**10**i).toLocaleString() + "</sup></sup>";
 		} // from 10^^3 to 10^^4
-	} else if (x < 17000000) {
-		i = (x-6800000)/10200000
+	} else if (x < 10000000) {
+		i = (x-5000000)/5000000
 		if (10**10**i < numDigits) {
 			return "10<sup>10<sup>" + Math.floor(10**10**10**i).toLocaleString() + "</sup></sup>";
 		} else {
 			return "10<sup>10<sup>" + (Math.floor(10**((10**10**i)%1)*1000000)/1000000).toFixed(6) + " × 10<sup>" + Math.floor(10**10**i).toLocaleString() + "</sup></sup></sup>";
 		} // from 10^^4 to 10^^5
 	} else {
-		i = (x-17000000)/23000000
+		i = (x-10000000)/7000000
 		if (10**10**i < numDigits) {
 			return "10<sup>10<sup>10<sup>" + Math.floor(Math.min(10**10**10**i, 3e45)).toLocaleString() + "</sup></sup></sup>";
 		} else {
@@ -550,7 +575,7 @@ function valueNumber2(t) {
 			return "10<sup>10<sup>10<sup>" + (Math.floor(10**(imin%1)*1000000)/1000000).toFixed(6) + " × 10<sup>" + Math.floor(imin).toLocaleString() + "</sup></sup></sup></sup>";
 		}
 	}
-	return "one " + "nonecxen".fontcolor("green") + "ulti".fontcolor("red") + "nonecxen".fontcolor("green") + "ersi".fontcolor("red") + "nonecxen".fontcolor("green") + "up".fontcolor("red") + "illion";
+	return "";
 }
 var showNum = true;
 var runInterval = 16.666; // milliseconds
@@ -562,15 +587,17 @@ if (tAdder == 0) {
 	tAdder = 0;
 	}
 }
-function resetTo0() {t = 0*speedMultiplier}
+function resetTo0() {t = 0}
+function goToMaxValue() {t = 67527641.222}
 function plus1s() {t += 100*speedMultiplier}
 function minus1s() {t = Math.max(0, t - 100*speedMultiplier)}
 function plus1min() {t += 6000*speedMultiplier}
 function minus1min() {t = Math.max(0, t - 6000*speedMultiplier)}
 function plus1h() {t += 360000*speedMultiplier}
 function minus1h() {t = Math.max(0, t - 360000*speedMultiplier)}
-function speedDouble() {speedMultiplier *= 2}
-function speedHalf() {speedMultiplier /= 2}
+function speedDouble() {document.getElementById("speedMult").value *= 2}
+function speedHalf() {document.getElementById("speedMult").value /= 2}
+function reverseSpeed() {document.getElementById("speedMult").value *= -1}
 function showNumber() {
 	showNum = !(showNum);
 }
@@ -581,7 +608,12 @@ function displayOutput() {
 	} else {
 	document.getElementById("number2").innerHTML = "";
 	}
-	t+=tAdder*speedMultiplier;
+	t = Math.min(Math.max(t+tAdder*speedMultiplier, 0),67527641.222);
+	if (isNaN(document.getElementById("speedMult").value)) {
+		speedMultiplier = 0;
+		} else {
+		speedMultiplier = document.getElementById("speedMult").value;
+		}
 	}
 load();
 setInterval(displayOutput, runInterval);
