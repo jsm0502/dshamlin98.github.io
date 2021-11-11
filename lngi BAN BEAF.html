@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html>
 <body>
+Running: <input type="checkbox" id="numberRunning" checked></input>
 <button onclick="func1()">Reset to 0</button>
 <button onclick="func2()">x2 Speed</button>
 <button onclick="func3()">/2 Speed</button>
-Running: <input type="checkbox" id="numberRunning" checked></input>
+<button onclick="func4()">Reverse</button>
 <p><font size="5" id="number"></font></p>
 
 <script>
@@ -229,6 +230,7 @@ setInterval(save, 100);
 function func1() {t=0}
 function func2() {tStep*=2}
 function func3() {tStep/=2}
+function func4() {tStep*=-1}
 
 /*
 [1](n) = {10, n}
